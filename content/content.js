@@ -5,9 +5,11 @@
   const MAX_TERMS = 5;
 
   // ── State ──────────────────────────────────────────────────────────
-  let terms = [""]; // array of search strings (max 5)
-  let highlights = []; // highlights[termIndex] = [element, ...]
-  let currentIndex = []; // currentIndex[termIndex] = int (-1 = none)
+  // Each term: { id, text, colorIndex }
+  let nextId = 1;
+  let terms = [{ id: nextId++, text: "", colorIndex: 0 }];
+  let highlights = [[]]; // highlights[position] = [element, ...]
+  let currentIndex = [-1]; // currentIndex[position] = int
   let panelVisible = false;
 
   // ── Host element + Shadow DOM ──────────────────────────────────────
@@ -91,6 +93,7 @@
       font-size: 13px;
     }
     button:hover { background: #333; border-color: #666; }
+    button:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 
     .nav-btn { width: 24px; height: 24px; padding: 0; flex-shrink: 0; }
     .remove-btn { width: 24px; height: 24px; padding: 0; flex-shrink: 0; color: #999; }
@@ -152,6 +155,15 @@
 
   document.documentElement.appendChild(host);
 
+  // ── Color assignment ───────────────────────────────────────────────
+  function nextAvailableColor() {
+    const used = new Set(terms.map((t) => t.colorIndex));
+    for (let c = 0; c < COLORS.length; c++) {
+      if (!used.has(c)) return c;
+    }
+    return 0; // fallback (shouldn't happen with max 5)
+  }
+
   // ── Build / rebuild term rows ──────────────────────────────────────
   function renderRows() {
     rowsContainer.innerHTML = "";
@@ -161,16 +173,17 @@
 
       const dot = document.createElement("span");
       dot.className = "color-dot";
-      dot.style.background = COLORS[i];
+      dot.style.background = COLORS[term.colorIndex];
       row.appendChild(dot);
 
       const input = document.createElement("input");
       input.type = "text";
       input.placeholder = `Search term ${i + 1}`;
-      input.value = term;
+      input.value = term.text;
       input.addEventListener("input", () => {
-        terms[i] = input.value;
+        terms[i].text = input.value;
         runHighlight();
+        updateActionButtons();
         saveState();
       });
       input.addEventListener("keydown", (e) => {
@@ -178,6 +191,18 @@
         if (e.key === "Enter" && e.shiftKey) { navigateTerm(i, -1); e.preventDefault(); }
         else if (e.key === "Enter") { navigateTerm(i, 1); e.preventDefault(); }
       });
+
+      // Collapse empty rows on blur
+      const termId = term.id;
+      input.addEventListener("blur", () => {
+        setTimeout(() => {
+          const idx = terms.findIndex((t) => t.id === termId);
+          if (idx >= 0 && terms.length > 1 && !terms[idx].text) {
+            removeTerm(idx);
+          }
+        }, 150);
+      });
+
       row.appendChild(input);
 
       const count = document.createElement("span");
@@ -212,8 +237,7 @@
       rowsContainer.appendChild(row);
     });
 
-    addBtn.style.display = terms.length >= MAX_TERMS ? "none" : "";
-    clearBtn.style.display = terms.length > 1 ? "" : "none";
+    updateActionButtons();
 
     // Focus the last empty input
     const inputs = rowsContainer.querySelectorAll("input");
@@ -221,9 +245,15 @@
     if (lastInput && !lastInput.value) lastInput.focus();
   }
 
+  function updateActionButtons() {
+    const hasEmpty = terms.some((t) => !t.text);
+    addBtn.disabled = terms.length >= MAX_TERMS || hasEmpty;
+    clearBtn.style.display = terms.length > 1 ? "" : "none";
+  }
+
   function matchCountText(i) {
     const h = highlights[i];
-    if (!h || h.length === 0) return terms[i] ? "0" : "";
+    if (!h || h.length === 0) return terms[i].text ? "0" : "";
     const ci = currentIndex[i];
     return ci >= 0 ? `${ci + 1}/${h.length}` : `${h.length}`;
   }
@@ -238,7 +268,7 @@
   // ── Term management ────────────────────────────────────────────────
   function addTerm() {
     if (terms.length >= MAX_TERMS) return;
-    terms.push("");
+    terms.push({ id: nextId++, text: "", colorIndex: nextAvailableColor() });
     highlights.push([]);
     currentIndex.push(-1);
     renderRows();
@@ -250,8 +280,7 @@
     terms.splice(i, 1);
     highlights.splice(i, 1);
     currentIndex.splice(i, 1);
-    // re-index remaining highlights
-    reindexHighlights();
+    runHighlight();
     renderRows();
     updateMatchCounts();
     saveState();
@@ -259,7 +288,7 @@
 
   function clearAll() {
     clearAllHighlights();
-    terms = [""];
+    terms = [{ id: nextId++, text: "", colorIndex: 0 }];
     highlights = [[]];
     currentIndex = [-1];
     renderRows();
@@ -287,7 +316,7 @@
   function dismissPanel() {
     hidePanel();
     clearAllHighlights();
-    terms = [""];
+    terms = [{ id: nextId++, text: "", colorIndex: 0 }];
     highlights = [[]];
     currentIndex = [-1];
     chrome.storage.local.remove("ctrleff_state");
@@ -322,27 +351,20 @@
     }
   }
 
-  function reindexHighlights() {
-    // Update data-term attribute on remaining highlights after removal
-    highlights.forEach((marks, i) => {
-      marks.forEach((mark) => mark.setAttribute("data-term", i));
-    });
-  }
-
   function runHighlight() {
     clearAllHighlights();
     highlights = terms.map(() => []);
     currentIndex = terms.map(() => -1);
 
     terms.forEach((term, i) => {
-      if (!term) return;
-      highlightTerm(term, i);
+      if (!term.text) return;
+      highlightTerm(term.text, i, term.colorIndex);
     });
 
     updateMatchCounts();
   }
 
-  function highlightTerm(term, termIndex) {
+  function highlightTerm(term, posIndex, colorIndex) {
     const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     let regex;
     try {
@@ -361,7 +383,7 @@
           // Skip script/style
           const tag = node.parentElement?.tagName;
           if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT") return NodeFilter.FILTER_REJECT;
-          // Skip already-highlighted nodes for this same term (avoid infinite loops)
+          // Skip already-highlighted nodes (avoid infinite loops)
           if (node.parentElement?.tagName === "CTRLEFF-MARK") return NodeFilter.FILTER_REJECT;
           return NodeFilter.FILTER_ACCEPT;
         },
@@ -389,10 +411,10 @@
           frag.appendChild(document.createTextNode(text.slice(lastEnd, start)));
         }
         const mark = document.createElement("ctrleff-mark");
-        mark.setAttribute("data-term", termIndex);
+        mark.setAttribute("data-term", colorIndex);
         mark.textContent = matchText;
         frag.appendChild(mark);
-        highlights[termIndex].push(mark);
+        highlights[posIndex].push(mark);
         lastEnd = end;
       });
 
@@ -431,9 +453,11 @@
 
   // ── Persistence ────────────────────────────────────────────────────
   function saveState() {
-    const nonEmpty = terms.some((t) => t.length > 0);
+    const nonEmpty = terms.some((t) => t.text.length > 0);
     if (nonEmpty) {
-      chrome.storage.local.set({ ctrleff_state: { terms } });
+      // Save text + colorIndex (not id, that's ephemeral)
+      const data = terms.map((t) => ({ text: t.text, colorIndex: t.colorIndex }));
+      chrome.storage.local.set({ ctrleff_state: { terms: data } });
     } else {
       chrome.storage.local.remove("ctrleff_state");
     }
@@ -442,8 +466,17 @@
   function loadState() {
     chrome.storage.local.get("ctrleff_state", (result) => {
       const state = result?.ctrleff_state;
-      if (state?.terms?.length && state.terms.some((t) => t.length > 0)) {
-        terms = state.terms.slice(0, MAX_TERMS);
+      if (state?.terms?.length && state.terms.some((t) => t.text?.length > 0)) {
+        // Filter out empty terms on load (clean slate)
+        const loaded = state.terms
+          .filter((t) => t.text?.length > 0)
+          .slice(0, MAX_TERMS);
+        if (loaded.length === 0) return;
+        terms = loaded.map((t) => ({
+          id: nextId++,
+          text: t.text,
+          colorIndex: t.colorIndex ?? 0,
+        }));
         highlights = terms.map(() => []);
         currentIndex = terms.map(() => -1);
         showPanel();
