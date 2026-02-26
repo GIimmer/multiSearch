@@ -204,6 +204,7 @@
 
   // ── Panel visibility ───────────────────────────────────────────────
   CE.showPanel = () => {
+    if (!state.ready) return;
     host.style.display = "block";
     state.panelVisible = true;
     CE.renderRows();
@@ -221,6 +222,7 @@
   };
 
   CE.dismissPanel = () => {
+    if (!state.ready) return;
     CE.hidePanel();
     CE.clearAllHighlights();
     CE.resetState();

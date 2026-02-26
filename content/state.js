@@ -17,6 +17,7 @@ window.MultiSearch = window.MultiSearch || {};
     highlights: [[]],
     currentIndex: [-1],
     panelVisible: false,
+    ready: false,
   };
 
   // ── Helpers ──────────────────────────────────────────────────────────

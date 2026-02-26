@@ -27,6 +27,7 @@
 
   // ── Bootstrap ──────────────────────────────────────────────────────
   CE.initPanel().then(() => {
+    CE.state.ready = true;
     CE.loadState(() => {
       CE.showPanel();
     });
