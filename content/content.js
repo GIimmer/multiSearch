@@ -263,10 +263,11 @@
   }
 
   function matchCountText(i) {
-    const h = highlights[i];
-    if (!h || h.length === 0) return terms[i].text ? "0" : "";
+    const visible = visibleMarks(i);
+    if (visible.length === 0) return terms[i].text ? "0" : "";
     const ci = currentIndex[i];
-    return ci >= 0 ? `${ci + 1}/${h.length}` : `${h.length}`;
+    const visIdx = ci >= 0 ? visible.indexOf(highlights[i][ci]) : -1;
+    return visIdx >= 0 ? `${visIdx + 1}/${visible.length}` : `${visible.length}`;
   }
 
   function updateMatchCounts() {
@@ -437,6 +438,23 @@
     });
   }
 
+  // ── Visibility helper ───────────────────────────────────────────────
+  function isVisible(el) {
+    if (typeof el.checkVisibility === "function") {
+      return el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true });
+    }
+    // Fallback for older browsers
+    if (!el.offsetParent && getComputedStyle(el).position !== "fixed") return false;
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 || rect.height > 0;
+  }
+
+  function visibleMarks(termIndex) {
+    const marks = highlights[termIndex];
+    if (!marks) return [];
+    return marks.filter(isVisible);
+  }
+
   // ── Navigation ─────────────────────────────────────────────────────
   function navigateTerm(termIndex, direction) {
     const marks = highlights[termIndex];
@@ -447,17 +465,24 @@
       marks[currentIndex[termIndex]].classList.remove("ctrleff-current");
     }
 
-    // Advance
-    let next = currentIndex[termIndex] + direction;
-    if (next >= marks.length) next = 0;
-    if (next < 0) next = marks.length - 1;
-    currentIndex[termIndex] = next;
+    // Advance, skipping hidden marks
+    const start = currentIndex[termIndex];
+    let next = start;
+    let steps = 0;
+    do {
+      next += direction;
+      if (next >= marks.length) next = 0;
+      if (next < 0) next = marks.length - 1;
+      steps++;
+    } while (!isVisible(marks[next]) && steps < marks.length);
 
+    // If we looped all the way around, nothing is visible
+    if (steps >= marks.length && !isVisible(marks[next])) return;
+
+    currentIndex[termIndex] = next;
     const el = marks[next];
-    if (el) {
-      el.classList.add("ctrleff-current");
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    el.classList.add("ctrleff-current");
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
 
     updateMatchCounts();
   }
