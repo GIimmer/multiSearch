@@ -5,7 +5,7 @@
 
   // ── Keyboard shortcut ──────────────────────────────────────────────
   document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey && e.shiftKey && e.key === "F") {
+    if (e.metaKey && e.altKey && e.key === "s") {
       CE.togglePanel();
       e.preventDefault();
       e.stopPropagation();

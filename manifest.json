@@ -20,8 +20,7 @@
   "commands": {
     "_execute_action": {
       "suggested_key": {
-        "default": "Alt+Shift+F",
-        "mac": "MacCtrl+Shift+F"
+        "mac": "Command+Alt+S"
       },
       "description": "Toggle MultiSearch panel"
     }
