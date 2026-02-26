@@ -28,11 +28,8 @@
     // Load HTML template
     const res = await fetch(chrome.runtime.getURL("content/panel.html"));
     const html = await res.text();
-    const container = document.createElement("div");
-    container.innerHTML = html;
-
-    // Move the panel element into the shadow root
-    const panel = container.firstElementChild;
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const panel = doc.body.firstElementChild;
     shadow.appendChild(panel);
 
     // Cache DOM references
