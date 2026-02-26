@@ -47,6 +47,16 @@
     closeBtn.addEventListener("click", () => CE.dismissPanel());
   };
 
+  // ── Debounce helper ─────────────────────────────────────────────────
+  let debounceTimer = null;
+  function debounceHighlight() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      CE.runHighlight();
+      CE.saveState();
+    }, 100);
+  }
+
   // ── Row rendering ──────────────────────────────────────────────────
   CE.renderRows = () => {
     if (!rowsContainer) return;
@@ -68,9 +78,8 @@
 
       input.addEventListener("input", () => {
         state.terms[i].text = input.value;
-        CE.runHighlight();
         updateActionButtons();
-        CE.saveState();
+        debounceHighlight();
       });
 
       input.addEventListener("keydown", (e) => {
