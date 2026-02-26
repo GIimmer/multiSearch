@@ -188,8 +188,19 @@
       });
       input.addEventListener("keydown", (e) => {
         if (e.key === "Escape") { dismissPanel(); e.preventDefault(); }
-        if (e.key === "Enter" && e.shiftKey) { navigateTerm(i, -1); e.preventDefault(); }
-        else if (e.key === "Enter") { navigateTerm(i, 1); e.preventDefault(); }
+        if (e.key === "ArrowUp") { navigateTerm(i, -1); e.preventDefault(); }
+        if (e.key === "ArrowDown") { navigateTerm(i, 1); e.preventDefault(); }
+        if (e.key === "Enter") {
+          if (i < terms.length - 1) {
+            // Focus next existing input
+            const inputs = rowsContainer.querySelectorAll("input");
+            if (inputs[i + 1]) inputs[i + 1].focus();
+          } else if (terms.length < MAX_TERMS && terms[i].text) {
+            // On last term with text: add a new term and focus it
+            addTerm();
+          }
+          e.preventDefault();
+        }
       });
 
       // Collapse empty rows on blur
