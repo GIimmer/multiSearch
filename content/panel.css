@@ -1,0 +1,160 @@
+:host {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.panel {
+  background: #1e1e1e;
+  color: #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+  padding: 8px;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  user-select: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 4px;
+  border-bottom: 1px solid #333;
+}
+
+.header .title {
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: #aaa;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: fadeIn 0.12s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+input[type="text"] {
+  flex: 1;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #eee;
+  padding: 4px 8px;
+  font-size: 13px;
+  outline: none;
+  min-width: 0;
+}
+
+input[type="text"]:focus {
+  border-color: #4A90D9;
+}
+
+.match-count {
+  font-size: 11px;
+  color: #888;
+  min-width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+button {
+  background: none;
+  border: 1px solid #444;
+  color: #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+button:hover {
+  background: #333;
+  border-color: #666;
+}
+
+button:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+.nav-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.remove-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  flex-shrink: 0;
+  color: #999;
+}
+
+.remove-btn:hover {
+  color: #f44;
+  border-color: #f44;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px solid #333;
+}
+
+.actions button {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+.add-btn {
+  color: #4A90D9;
+  border-color: #4A90D9;
+}
+
+.add-btn:hover {
+  background: rgba(74, 144, 217, 0.15);
+}
+
+.clear-btn {
+  color: #f77;
+  border-color: #f77;
+}
+
+.clear-btn:hover {
+  background: rgba(255, 119, 119, 0.15);
+}
+
+.close-btn {
+  margin-left: auto;
+  color: #999;
+  border-color: #555;
+}

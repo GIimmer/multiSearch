@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "CtrlEff",
+  "name": "MultiSearch",
   "version": "1.0.0",
   "description": "Enhanced multi-term find-in-page with cross-page persistence",
   "icons": {
@@ -15,7 +15,7 @@
       "48": "icons/icon48.svg",
       "128": "icons/icon128.svg"
     },
-    "default_title": "CtrlEff — Enhanced Find"
+    "default_title": "MultiSearch — Enhanced Find"
   },
   "commands": {
     "_execute_action": {
@@ -23,15 +23,26 @@
         "default": "Alt+Shift+F",
         "mac": "MacCtrl+Shift+F"
       },
-      "description": "Toggle CtrlEff search panel"
+      "description": "Toggle MultiSearch panel"
     }
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content/content.js"],
+      "js": [
+        "content/state.js",
+        "content/highlighter.js",
+        "content/panel.js",
+        "content/init.js"
+      ],
       "css": ["content/content.css"],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["content/panel.html", "content/panel.css"],
+      "matches": ["<all_urls>"]
     }
   ],
   "background": {

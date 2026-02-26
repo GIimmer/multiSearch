@@ -1,18 +1,18 @@
 /* Highlight styles applied to the page (outside Shadow DOM) */
-ctrleff-mark {
+msearch-mark {
   border-radius: 2px;
   padding: 0 1px;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
 
-ctrleff-mark[data-term="0"] { background-color: #FDD835; color: #000; }
-ctrleff-mark[data-term="1"] { background-color: #26C6DA; color: #000; }
-ctrleff-mark[data-term="2"] { background-color: #FFA726; color: #000; }
-ctrleff-mark[data-term="3"] { background-color: #EC407A; color: #000; }
-ctrleff-mark[data-term="4"] { background-color: #9CCC65; color: #000; }
+msearch-mark[data-term="0"] { background-color: #FDD835; color: #000; }
+msearch-mark[data-term="1"] { background-color: #26C6DA; color: #000; }
+msearch-mark[data-term="2"] { background-color: #FFA726; color: #000; }
+msearch-mark[data-term="3"] { background-color: #EC407A; color: #000; }
+msearch-mark[data-term="4"] { background-color: #9CCC65; color: #000; }
 
-ctrleff-mark.ctrleff-current {
+msearch-mark.msearch-current {
   outline: 2px solid #333;
   outline-offset: 1px;
   box-shadow: 0 0 4px rgba(0,0,0,0.4);
