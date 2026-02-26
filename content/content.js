@@ -335,7 +335,7 @@
 
   function togglePanel() {
     if (panelVisible) {
-      hidePanel();
+      dismissPanel();
     } else {
       showPanel();
     }
