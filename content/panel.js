@@ -226,7 +226,7 @@
     CE.hidePanel();
     CE.clearAllHighlights();
     CE.resetState();
-    chrome.storage.local.remove("msearch_state");
+    chrome.storage.local.remove(CE.STORAGE_KEY);
   };
 
   CE.togglePanel = () => {

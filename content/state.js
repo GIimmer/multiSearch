@@ -8,6 +8,7 @@ window.MultiSearch = window.MultiSearch || {};
   // ── Constants ────────────────────────────────────────────────────────
   CE.COLORS = ["#FDD835", "#26C6DA", "#FFA726", "#EC407A", "#9CCC65"];
   CE.MAX_TERMS = 5;
+  CE.STORAGE_KEY = "msearch_state";
 
   // ── State ────────────────────────────────────────────────────────────
   let nextId = 1;
@@ -42,15 +43,15 @@ window.MultiSearch = window.MultiSearch || {};
     const nonEmpty = CE.state.terms.some((t) => t.text.length > 0);
     if (nonEmpty) {
       const data = CE.state.terms.map((t) => ({ text: t.text, colorIndex: t.colorIndex }));
-      chrome.storage.local.set({ msearch_state: { terms: data } });
+      chrome.storage.local.set({ [CE.STORAGE_KEY]: { terms: data } });
     } else {
-      chrome.storage.local.remove("msearch_state");
+      chrome.storage.local.remove(CE.STORAGE_KEY);
     }
   };
 
   CE.loadState = (callback) => {
-    chrome.storage.local.get("msearch_state", (result) => {
-      const saved = result?.msearch_state;
+    chrome.storage.local.get(CE.STORAGE_KEY, (result) => {
+      const saved = result?.[CE.STORAGE_KEY];
       if (saved?.terms?.length && saved.terms.some((t) => t.text?.length > 0)) {
         const loaded = saved.terms
           .filter((t) => t.text?.length > 0)
