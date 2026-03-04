@@ -104,6 +104,7 @@ window.MultiSearch = window.MultiSearch || {};
       const wasEnabled = CE.state.syncEnabled;
       CE.state.syncEnabled = changes[CE.SYNC_PREF_KEY].newValue === true;
       if (CE.updateSyncCheckbox) CE.updateSyncCheckbox();
+      if (CE.updateCloseBtn) CE.updateCloseBtn();
 
       if (!wasEnabled && CE.state.syncEnabled && CE.state.ready) {
         CE.loadState(() => {
@@ -130,7 +131,7 @@ window.MultiSearch = window.MultiSearch || {};
     if (!newData || !newData.terms || newData.terms.length === 0) {
       CE.clearAllHighlights();
       CE.resetState();
-      if (CE.state.panelVisible && CE.renderRows) CE.renderRows();
+      if (CE.hidePanel) CE.hidePanel();
       return;
     }
 

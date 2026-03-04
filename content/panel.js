@@ -16,6 +16,7 @@
   let rowsContainer = null;
   let addBtn = null;
   let clearBtn = null;
+  let closeBtn = null;
   let syncCheckbox = null;
 
   // ── Load HTML + CSS into Shadow DOM ────────────────────────────────
@@ -37,7 +38,7 @@
     rowsContainer = shadow.querySelector(".rows");
     addBtn = shadow.querySelector(".add-btn");
     clearBtn = shadow.querySelector(".clear-btn");
-    const closeBtn = shadow.querySelector(".close-btn");
+    closeBtn = shadow.querySelector(".close-btn");
     syncCheckbox = shadow.querySelector(".sync-checkbox");
 
     // Wire up static button events
@@ -47,9 +48,11 @@
 
     // Sync toggle
     syncCheckbox.checked = CE.state.syncEnabled;
+    updateCloseBtn();
     syncCheckbox.addEventListener("change", () => {
       CE.state.syncEnabled = syncCheckbox.checked;
       CE.saveSyncPref();
+      updateCloseBtn();
       if (CE.state.syncEnabled) {
         CE.saveState();
       }
@@ -242,6 +245,11 @@
   CE.updateSyncCheckbox = () => {
     if (syncCheckbox) syncCheckbox.checked = CE.state.syncEnabled;
   };
+
+  function updateCloseBtn() {
+    if (closeBtn) closeBtn.textContent = CE.state.syncEnabled ? "Close All" : "Close";
+  }
+  CE.updateCloseBtn = updateCloseBtn;
 
   CE.togglePanel = () => {
     if (state.panelVisible) {
