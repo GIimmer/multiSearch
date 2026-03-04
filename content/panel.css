@@ -158,3 +158,59 @@ button:disabled {
   color: #999;
   border-color: #555;
 }
+
+/* ── Sync toggle ──────────────────────────────────────────── */
+.sync-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.sync-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.sync-slider {
+  width: 28px;
+  height: 14px;
+  background: #444;
+  border-radius: 7px;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.sync-slider::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #999;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.sync-checkbox:checked + .sync-slider {
+  background: #4A90D9;
+}
+
+.sync-checkbox:checked + .sync-slider::after {
+  transform: translateX(14px);
+  background: #fff;
+}
+
+.sync-checkbox:focus-visible + .sync-slider {
+  outline: 2px solid #4A90D9;
+  outline-offset: 2px;
+}
+
+.sync-label {
+  font-size: 11px;
+  color: #888;
+  user-select: none;
+}

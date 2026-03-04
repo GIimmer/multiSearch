@@ -16,6 +16,7 @@
   let rowsContainer = null;
   let addBtn = null;
   let clearBtn = null;
+  let syncCheckbox = null;
 
   // ── Load HTML + CSS into Shadow DOM ────────────────────────────────
   CE.initPanel = async () => {
@@ -37,20 +38,31 @@
     addBtn = shadow.querySelector(".add-btn");
     clearBtn = shadow.querySelector(".clear-btn");
     const closeBtn = shadow.querySelector(".close-btn");
+    syncCheckbox = shadow.querySelector(".sync-checkbox");
 
     // Wire up static button events
     addBtn.addEventListener("click", () => CE.addTerm());
     clearBtn.addEventListener("click", () => CE.clearAll());
     closeBtn.addEventListener("click", () => CE.dismissPanel());
+
+    // Sync toggle
+    syncCheckbox.checked = CE.state.syncEnabled;
+    syncCheckbox.addEventListener("change", () => {
+      CE.state.syncEnabled = syncCheckbox.checked;
+      CE.saveSyncPref();
+      if (CE.state.syncEnabled) {
+        CE.saveState();
+      }
+    });
   };
 
   // ── Debounce helper ─────────────────────────────────────────────────
+  let _dirty = false;
   let debounceTimer = null;
   function debounceHighlight() {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       CE.runHighlight();
-      CE.saveState();
     }, 100);
   }
 
@@ -75,6 +87,7 @@
 
       input.addEventListener("input", () => {
         state.terms[i].text = input.value;
+        _dirty = true;
         updateActionButtons();
         debounceHighlight();
       });
@@ -94,9 +107,10 @@
         }
       });
 
-      // Collapse empty rows on blur
+      // Save on blur + collapse empty rows
       const termId = term.id;
       input.addEventListener("blur", () => {
+        if (_dirty) { CE.saveState(); _dirty = false; }
         setTimeout(() => {
           const idx = state.terms.findIndex((t) => t.id === termId);
           if (idx >= 0 && state.terms.length > 1 && !state.terms[idx].text) {
@@ -178,7 +192,6 @@
     state.highlights.push([]);
     state.currentIndex.push(-1);
     CE.renderRows();
-    CE.saveState();
   };
 
   CE.removeTerm = (i) => {
@@ -223,7 +236,11 @@
     CE.hidePanel();
     CE.clearAllHighlights();
     CE.resetState();
-    chrome.storage.local.remove(CE.STORAGE_KEY);
+    CE.clearSyncedState();
+  };
+
+  CE.updateSyncCheckbox = () => {
+    if (syncCheckbox) syncCheckbox.checked = CE.state.syncEnabled;
   };
 
   CE.togglePanel = () => {

@@ -26,10 +26,12 @@
   });
 
   // ── Bootstrap ──────────────────────────────────────────────────────
-  CE.initPanel().then(() => {
-    CE.state.ready = true;
-    CE.loadState(() => {
-      CE.showPanel();
+  CE.loadSyncPref(() => {
+    CE.initPanel().then(() => {
+      CE.state.ready = true;
+      CE.loadState(() => {
+        CE.showPanel();
+      });
     });
   });
 })();
