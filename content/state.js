@@ -82,6 +82,7 @@ window.MultiSearch = window.MultiSearch || {};
           .filter((t) => t.text?.length > 0)
           .slice(0, CE.MAX_TERMS);
         if (loaded.length === 0) return;
+        CE.clearAllHighlights();
         CE.state.terms = loaded.map((t) => ({
           id: CE.generateId(),
           text: t.text,
