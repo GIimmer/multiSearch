@@ -25,24 +25,25 @@
   };
 
   // ── Clear highlights ───────────────────────────────────────────────
-  CE.clearHighlightsForTerm = (termIndex) => {
+  CE.clearHighlightsForTerm = (termIndex, parents) => {
     const marks = state.highlights[termIndex];
     if (!marks) return;
     marks.forEach((mark) => {
       const parent = mark.parentNode;
       if (!parent) return;
-      const text = document.createTextNode(mark.textContent);
-      parent.replaceChild(text, mark);
-      parent.normalize();
+      parent.replaceChild(document.createTextNode(mark.textContent), mark);
+      if (parents) parents.add(parent); else parent.normalize();
     });
     state.highlights[termIndex] = [];
     state.currentIndex[termIndex] = -1;
   };
 
   CE.clearAllHighlights = () => {
+    const parents = new Set();
     for (let i = 0; i < state.highlights.length; i++) {
-      CE.clearHighlightsForTerm(i);
+      CE.clearHighlightsForTerm(i, parents);
     }
+    parents.forEach((p) => p.normalize());
   };
 
   // ── Run highlighting ───────────────────────────────────────────────
