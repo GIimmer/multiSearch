@@ -10,6 +10,7 @@ window.MultiSearch = window.MultiSearch || {};
   CE.MAX_TERMS = 5;
   CE.STORAGE_KEY = "msearch_state";
   CE.SYNC_PREF_KEY = "msearch_sync";
+  CE.DISMISS_KEY = "msearch_dismiss";
 
   // ── State ────────────────────────────────────────────────────────────
   let nextId = 1;
@@ -71,6 +72,7 @@ window.MultiSearch = window.MultiSearch || {};
     if (!CE.state.syncEnabled) return;
     _selfWrites++;
     chrome.storage.local.remove(CE.STORAGE_KEY);
+    chrome.storage.local.set({ [CE.DISMISS_KEY]: Date.now() });
   };
 
   CE.loadState = (callback) => {
@@ -116,6 +118,14 @@ window.MultiSearch = window.MultiSearch || {};
       }
     }
 
+    // Dismiss signal from another tab (Close All / Escape / icon)
+    if (changes[CE.DISMISS_KEY] && CE.state.syncEnabled) {
+      CE.clearAllHighlights();
+      CE.resetState();
+      if (CE.hidePanel) CE.hidePanel();
+      return;
+    }
+
     // Only process term changes when sync is enabled
     if (!CE.state.syncEnabled) return;
     if (!changes[CE.STORAGE_KEY]) return;
@@ -131,7 +141,7 @@ window.MultiSearch = window.MultiSearch || {};
     if (!newData || !newData.terms || newData.terms.length === 0) {
       CE.clearAllHighlights();
       CE.resetState();
-      if (CE.hidePanel) CE.hidePanel();
+      if (CE.state.panelVisible && CE.renderRows) CE.renderRows();
       return;
     }
 
