@@ -72,6 +72,7 @@
   // ── Row rendering ──────────────────────────────────────────────────
   CE.renderRows = () => {
     if (!rowsContainer) return;
+    _dirty = false;
     rowsContainer.innerHTML = "";
 
     state.terms.forEach((term, i) => {
